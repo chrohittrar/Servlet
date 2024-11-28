@@ -6,7 +6,7 @@
 *.log
 *.tmp
 
-\web.xml
+web.xml
 context.xml
 server.xml
 tomcat-users.xml
