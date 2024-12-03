@@ -1,4 +1,5 @@
-package javaservlet;
+
+package random;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -14,18 +15,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/loginCheckUsingdB")
-public class LoginCheckUsingdB extends HttpServlet {
+@WebServlet("/registrationServlet")
+public class RegistrationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private Connection con = null;
+	Connection con = null;
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 
+		String path = "com.mysql.cj.jdbc.Driver";
+		String url = "jdbc:mysql://localhost:3306/shoppingdb";
+		String user = "root";
+		String pwd = "shreya";
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/shoppingdb", "root", "shreya");
-			System.out.println("Connection done");
+			Class.forName(path);
+			con = DriverManager.getConnection(url, user, pwd);
+			System.out.println("Driver class Founded and dB Connected Succesfully");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			System.out.println("Drier not found");
@@ -33,6 +38,7 @@ public class LoginCheckUsingdB extends HttpServlet {
 			e.printStackTrace();
 			System.out.println("Connection Failed");
 		}
+
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,28 +49,40 @@ public class LoginCheckUsingdB extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String userid = request.getParameter("uid");
-		String pswd = request.getParameter("pwd");
+		String query = "insert into users values (?,?,?,?,?,?,?)";
+		String u_id = request.getParameter("u_id");
+		String pwd = request.getParameter("pwd");
+		String fname = request.getParameter("fname");
+		String mname = request.getParameter("mname");
+		String lname = request.getParameter("lname");
+		String email = request.getParameter("email");
+		String contact = request.getParameter("contact");
+
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			ps = con.prepareStatement("select u_id, password from users where u_id=? and password=?");
-			ps.setString(1, userid);
-			ps.setString(2, pswd);
+			ps = con.prepareStatement(query);
 
-			rs = ps.executeQuery();
+			ps.setString(1, u_id);
+			ps.setString(2, pwd);
+			ps.setString(3, fname);
+			ps.setString(4, mname);
+			ps.setString(5, lname);
+			ps.setString(6, email);
+			ps.setString(7, contact);
 
-			if (rs.next()) {
-				response.getWriter().append("Login Successful");
+			int n = ps.executeUpdate();
+
+			if (n > 0) {
+				response.getWriter().append("Registered Succesfully");
 			} else {
-				response.sendRedirect("/FirstWeb/login.html");
+				response.getWriter().append("Registered Failed");
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-
 			try {
 				if (rs != null)
 					rs.close();
